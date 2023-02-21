@@ -116,8 +116,8 @@ e_caja3.place(relheight=.05, relwidth=.2, relx=.65, rely=.55)
 e_caja4 = Entry(primer_caja, bg='black', fg='orangered', font='bold 15')
 e_caja4.place(relheight=.10, relwidth=.25, relx=.58, rely=.45)
 
-# e_caja5 = Entry(segunda_caja, bg='black', fg='orangered', font='bold 15')
-# e_caja5.place(relheight=.10, relwidth=.25, relx=.58, rely=.45)
+e_caja5 = Entry(segunda_caja, bg='black', fg='orangered', font='bold 15')
+e_caja5.place(relheight=.10, relwidth=.25, relx=.58, rely=.45)
 
 # ***********************FUNCIONES ENVIO DE DATOS A ARDUINO***************************
 
@@ -144,16 +144,22 @@ def save_data2():
 def save_data3():
     datos3 = e_caja3.get()
     ar.comunicar3(datos3)
+    e_caja3.delete(0, END)
+
 
 
 def save_data4():
     datos4 = e_caja4.get()
     ar.comunicar4(datos4)
+    e_caja4.delete(0, END)
+
 
 
 def repeat_data():
-    repeat = e_caja3.get()
+    repeat = e_caja5.get()
     ar.cycles(repeat)
+    e_caja2.delete(0, END)
+
 
 
 #                   ****************BOTONES***************
@@ -174,11 +180,11 @@ boton_caja1_col2 = tk.Button(
     primer_caja, text=mensaje, bg='black', fg='orangered', font='12', command=save_data3)
 boton_caja1_col2.place(relheight=.19, relwidth=.19, relx=.6, rely=.65)
 
-# mensaje = '''ingresar
-# datos'''
-# boton_caja2_col2 = tk.Button(segunda_caja, text=mensaje,
-#                              bg='black', fg='orangered', font='12', command=save_data4)
-# boton_caja2_col2.place(relheight=.19, relwidth=.19, relx=.6, rely=.65)
+mensaje = '''confirmar 
+datos'''
+boton_caja2_col2 = tk.Button(segunda_caja, text=mensaje,
+                              bg='green', fg='white', font='16', command=save_data4)
+boton_caja2_col2.place(relheight=.19, relwidth=.19, relx=.6, rely=.65)
 
 
 mensaje = 'Repetir'
