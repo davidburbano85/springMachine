@@ -2,6 +2,8 @@ import serial
 import time
 
 
+
+
 # ARDUINO
 # def comunicar(loquesea):
 
@@ -11,33 +13,51 @@ import time
 #     arduino.close()
 
 
-def comunicar(denuevoloquesea):
+def comunicarArduino(respuesta):   
+     arduino= serial.Serial('COM3', 9600)
+     respuestaDeTKinter=respuesta  
+     print(respuestaDeTKinter)   
 
-    arduino = serial.Serial('COM3', 9600)
-    time.sleep(2)
-    arduino.write(denuevoloquesea.encode())
-    arduino.close()
+     for i in range(6) :                  
+          leerArduino=arduino.readline().decode()  
+          arduino.write(respuestaDeTKinter.encode())
+          print(leerArduino)
+     arduino.close()  
+
+#     leerArduino=arduino.readline().decode().strip()
+#     print(leerArduino)
+#     responderArduino=input(respuesta)
+#     arduino.write(responderArduino.encode())
+
+#     leerArduino=arduino.readline().decode().strip()
+#     print(leerArduino)
+#     responderArduino=input(respuesta )
+#     arduino.write(responderArduino.encode())
+
+#     leerArduino=arduino.readline().decode().strip()
+#     print(leerArduino)
+#     responderArduino=input(respuesta )
+#     arduino.write(responderArduino.encode())
+
+#     leerArduino=arduino.readline().decode().strip()
+#     print(leerArduino)
 
 
-def comunicar2(denuevoloquese):
+#     leerArduino=arduino.readline().decode().strip()
+#     print(leerArduino)
 
-    arduino = serial.Serial('COM3', 9600)
-    time.sleep(2)
-    arduino.write(denuevoloquese.encode())
-    arduino.close()
+#     leerArduino=arduino.readline().decode().strip()
+#     print(leerArduino)
+#     responderArduino=input(respuesta )
+#     arduino.write(responderArduino.encode())
 
-
-def comunicar3(denuevoloquese):
-
-    arduino = serial.Serial('COM3', 9600)
-    time.sleep(2)
-    arduino.write(denuevoloquese.encode())
-    arduino.close()
+#     leerArduino=arduino.readline().decode().strip()
+#     print(leerArduino)
+ 
+     # arduino.close()
 
 
-def comunicar4(denuevoloquese):
 
-    arduino = serial.Serial('COM3', 9600)
-    time.sleep(2)
-    arduino.write(denuevoloquese.encode())
-    arduino.close()
+
+    
+
