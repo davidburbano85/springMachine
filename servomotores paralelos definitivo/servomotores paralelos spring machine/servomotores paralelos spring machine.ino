@@ -103,8 +103,8 @@ void cargarDatosDesdeSerial() {
 
 
 void realizarCalculos() {
-  vueltasDeseadasPulRot = pasosPorRevPulRot *(nvR-4);
-  vueltasDeseadasPulAv = pasosPorRevPulAv * (nvAv-4);
+  vueltasDeseadasPulRot = pasosPorRevPulRot * (nvR - 4);
+  vueltasDeseadasPulAv = pasosPorRevPulAv * (nvAv - 4);
   Serial.println("los pulsos para el avance son : " + String(vueltasDeseadasPulAv) + " y los pulsos de rotacion son :" + String(vueltasDeseadasPulRot));
 }
 
