@@ -6,7 +6,7 @@
 #define ena 7
 #define finalCarrera 8
 int estado = 0;
-#define iniciocarrera 11
+#define iniciocarrera 12
 int estadoInicio = 0;
 
 //ESTAS SON PARA LA ESTRUCTURA struct Movimientos
@@ -30,7 +30,7 @@ Movimientos* movimientos = new Movimientos[cantidadMovimientos];
 
 unsigned long intervalPulRot = 0;  // 375en microsegundos
 unsigned long intervaloPulAv = 0;  // 250  En microsegunndos
-float newintervaloPulAv = 0;
+double newintervaloPulAv = 0;
 
 int pasosPorRevPulRot = 800;
 int pasosPorRevPulAv = 800;
@@ -38,29 +38,25 @@ unsigned int estadoDelProceso = 0;
 int repetir = 0;
 
 //--------DATOS USUARIO---------
-float nvR = 0;
-float nvAv = 0;
+double nvR = 0;
+double nvAv = 0;
 char dir1 = "";
-float diametroMaterial = 0;
-float vueltasCierre = 0;
+double diametroMaterial = 0;
+double vueltasCierre = 0;
 int aumento = 0;
-float vueltasFinalX = 0;
-float vueltasAvance = 0;
-float avancefinal = 0;
+double vueltasFinalX = 0;
+double vueltasAvance = 0;
+double avancefinal = 0;
 
 //-------------------------------
 
-
 unsigned long vueltasDeseadasPulRot = 0;  // pasosPorRevPulRot * nvR;
-float vueltasDeseadasPulAv = 0;           // pasosPorRevPulAv * nvAv;
+double vueltasDeseadasPulAv = 0;          // pasosPorRevPulAv * nvAv;
 
 char dir = "";
 
-
-
 void setup() {
   pinMode(finalCarrera, INPUT);
-  pinMode(13, OUTPUT);
   pinMode(iniciocarrera, INPUT);
 
 
@@ -74,12 +70,11 @@ void setup() {
   pinMode(ena, OUTPUT);
 }
 
-
 void loop() {
 
   estado = digitalRead(finalCarrera);
   if (estado == 0) {
-    // digitalWrite(13, HIGH);
+    digitalWrite(13, HIGH);
 
     switch (estadoDelProceso) {
       case 0:
@@ -114,14 +109,13 @@ void loop() {
         break;
 
       case 6:
-        delay(500);
         desajusteResorte();
         estadoDelProceso = 7;
         break;
 
       case 7:
         regresoAvance();
-        estadoDelProceso = 8;
+        //estadoDelProceso = 8;
 
         break;
 
@@ -140,10 +134,7 @@ void loop() {
       case 11:
         ejecutarJoystick();
     }
-
-
   } else {
-    estadoDelProceso = 0;
     digitalWrite(pulAv, LOW);
     digitalWrite(pulRot, LOW);
     // digitalWrite(13, LOW);
@@ -180,13 +171,17 @@ void cargarDatosDesdeSerial() {
   while (Serial.available() <= 0) {}
   diametroMaterial = Serial.parseFloat();
 
-  if (diametroMaterial > 0 && diametroMaterial <= 2) {
-    intervaloPulAv = 100;
-    intervalPulRot = 100;
+  if (diametroMaterial > 0 && diametroMaterial < 2) {
+    intervaloPulAv = 140;
+    intervalPulRot = 140;
   }
-  if (diametroMaterial > 2 && diametroMaterial < 3) {
-    intervaloPulAv = 250;
-    intervalPulRot = 250;
+  if (diametroMaterial >= 2 && diametroMaterial < 2.5) {
+    intervaloPulAv = 180;
+    intervalPulRot = 180;
+  }
+  if (diametroMaterial >= 2.5 && diametroMaterial < 3) {
+    intervaloPulAv = 450;
+    intervalPulRot = 450;
   }
   if (diametroMaterial >= 3) {
     Serial.println("g1");
@@ -211,14 +206,9 @@ void cargarDatosDesdeSerial() {
   while (Serial.available() <= 0) {}
   nvAv = Serial.parseFloat();
 
-
-
-
-
   Serial.println("b6");
   while (Serial.available() <= 0) {}
   vueltasCierre = Serial.parseFloat();
-
 
   Serial.println("b7");
   while (Serial.available() <= 0) {}
@@ -231,29 +221,46 @@ void cargarDatosDesdeSerial() {
 }
 
 void realizarCalculos() {
-  float pulsos = 2272 * (nvR - vueltasCierre);
-  float pulsosTotales = pulsos + (aumento * 2272);
+  //ROTACION
+  unsigned long interRe = 2272;
+  double pulsos = interRe * (nvR - vueltasCierre);
+  double pulsosTotales = pulsos + (aumento * interRe);
 
   vueltasDeseadasPulRot = pulsosTotales;
   vueltasFinalX = nvR - vueltasCierre + aumento;
+  //AVANCE
   vueltasAvance = nvAv * (nvR - vueltasCierre);
   avancefinal = diametroMaterial + vueltasAvance;
 
-  vueltasDeseadasPulAv = (avancefinal * 800) / 102;  // 102 es lo que avanza cada 800 pulsos
+  vueltasDeseadasPulAv = (avancefinal * pasosPorRevPulAv) / 102UL;  // 102 es lo que avanza cada 800 pulsos
 }
 void calculosVueltasInicioFin() {
-  unsigned long vueltasDeseadasPulRot1 = 2272 * (vueltasCierre / 2);
+  unsigned long inter = 2272;
+  unsigned long vueltasDeseadasPulRot1 = inter * (vueltasCierre / 2UL);
 
   unsigned long tiempoInicio3 = micros();
-  unsigned long vueltasDadasRotor = 0;
+  unsigned long tiempoinicioavance = micros();
+  unsigned long vueltasDadasRotor1 = 0;
+  double mmXpulso = 0.13;
+  double aumentoAlDiametro = 0.1;
 
+  unsigned long pulsosapriete = vueltasCierre * (mmXpulso + diametroMaterial + aumentoAlDiametro);
+  unsigned long intervalPulRotca = intervalPulRot;
 
-  while (vueltasDadasRotor < vueltasDeseadasPulRot1) {
+  while (vueltasDadasRotor1 < vueltasDeseadasPulRot1) {
     unsigned long tiempoActual1 = micros();
-    if (tiempoActual1 - tiempoInicio3 >= intervalPulRot && vueltasDadasRotor < vueltasDeseadasPulRot1) {
-      tiempoInicio3 += intervalPulRot;
+    unsigned long tiempoactualavanceapriete = micros();
+    if (tiempoActual1 - tiempoInicio3 >= intervalPulRotca && vueltasDadasRotor1 < vueltasDeseadasPulRot1) {
+      tiempoInicio3 += intervalPulRotca;
       digitalWrite(pulRot, !digitalRead(pulRot));
-      if (digitalRead(pulRot)) vueltasDadasRotor++;
+      if (digitalRead(pulRot)) vueltasDadasRotor1++;
+
+      unsigned long nuevointervaloapriete = (vueltasDeseadasPulRot1 / pulsosapriete) * intervaloPulAv;
+      if (tiempoactualavanceapriete - tiempoinicioavance >= nuevointervaloapriete) {
+        tiempoinicioavance += nuevointervaloapriete;
+        digitalWrite(pulAv, !digitalRead(pulAv));
+        digitalWrite(dirAv, LOW);
+      }
     }
 
     if (dir1 == 'D') {
@@ -279,10 +286,11 @@ void encenderMotores() {
   while (vueltasDadasRotor < vueltasDeseadasPulRot) {
     unsigned long tiempoActual2 = micros();
     unsigned long tiempoActual = micros();
+    unsigned long intervalPulRoten = intervalPulRot;
 
 
-    if (tiempoActual - tiempoInicio1 >= intervalPulRot && vueltasDadasRotor < vueltasDeseadasPulRot) {
-      tiempoInicio1 += intervalPulRot;
+    if (tiempoActual - tiempoInicio1 >= intervalPulRoten && vueltasDadasRotor < vueltasDeseadasPulRot) {
+      tiempoInicio1 += intervalPulRoten;
 
       digitalWrite(pulRot, !digitalRead(pulRot));
 
@@ -301,32 +309,33 @@ void encenderMotores() {
       }
     }
   }
-  vueltasDadasRotor = 0;
 }
 
 void desajusteResorte() {
 
-  unsigned long vueltasDeseadasPulRot1 = 2272 * 2;
-
-  unsigned long tiempoInicio3 = micros();
+  unsigned long vueltasDeseadasPulRot2 = 2272 * 2;
+  unsigned long tiempoInic = micros();
   unsigned long vueltasDadasRotor3 = 0;
-
+  unsigned long intervalPulRota = 200;
   if (dir1 == 'D') {
     digitalWrite(dirRot, LOW);
   }
   if (dir1 == 'I') {
     digitalWrite(dirRot, HIGH);
   }
-
-  while (vueltasDadasRotor3 < vueltasDeseadasPulRot1) {
-    unsigned long tiempoActual1 = micros();
-    if (tiempoActual1 - tiempoInicio3 >= intervalPulRot && vueltasDadasRotor3 < vueltasDeseadasPulRot1) {
-      tiempoInicio3 += intervalPulRot;
+  delay(700);
+  unsigned long tiempoInicio4 = micros();
+  while (vueltasDadasRotor3 < vueltasDeseadasPulRot2) {
+    unsigned long tiempoActualde = micros();
+    if (tiempoActualde - tiempoInicio4 >= intervalPulRota && vueltasDadasRotor3 < vueltasDeseadasPulRot2) {
+      tiempoInicio4 += intervalPulRota;
       digitalWrite(pulRot, !digitalRead(pulRot));
       if (digitalRead(pulRot)) vueltasDadasRotor3++;
     }
   }
 }
+
+
 void regresoAvance() {
 
   Serial.println("f1");  //regreso de avance
@@ -334,27 +343,21 @@ void regresoAvance() {
   int corte = Serial.parseInt();  //una vez se corte el material se da la orden para que el carro vuelva
 
   estadoInicio = digitalRead(iniciocarrera);
-  Serial.println(estadoInicio);
 
   if (corte == 1) {
-    unsigned long tiempoInicio3 = micros();
+    unsigned long tiempoInicio5 = micros();
     unsigned long vueltasDadasAvance1 = 0;
     int newinter = 800;
 
-    //while (vueltasDadasAvance1 < vueltasDeseadasPulAv) {
     while (estadoInicio != 1) {
-      unsigned long tiempoActual1 = micros();
-      if (tiempoActual1 - tiempoInicio3 >= newinter) {
-        tiempoInicio3 += newinter;
+      unsigned long tiempoActual3 = micros();
+      if (tiempoActual3 - tiempoInicio5 >= newinter) {
+        tiempoInicio5 += newinter;
         digitalWrite(pulAv, !digitalRead(pulAv));
         digitalWrite(dirAv, HIGH);
-        // } else {
-        //   Serial.println(estadoInicio);
-        //   estadoDelProceso = 8;
       }
       estadoInicio = digitalRead(iniciocarrera);
     }
-    Serial.println(estadoInicio);
 
     if (estadoInicio == 1) {
       estadoDelProceso = 8;
@@ -363,18 +366,35 @@ void regresoAvance() {
 }
 
 void repiteResorte() {
-  // while (true) {
   if (repetir >= 1) {
     Serial.println("c1");
     while (Serial.available() == 0) {};
     int recibe = Serial.parseInt();
     if (recibe == 1) {
       estadoDelProceso = 2;
+
+
+      realizarCalculos();
+      estadoDelProceso = 3;
+
+      calculosVueltasInicioFin();
+      estadoDelProceso = 4;
+
+      encenderMotores();
+      estadoDelProceso = 5;
+
+      calculosVueltasInicioFin();
+      estadoDelProceso = 6;
+
+      desajusteResorte();
+      estadoDelProceso = 7;
+
+      regresoAvance();
+      estadoDelProceso = 8;
+
       repetir--;
     };
   }
-  //  break;
-  // }
 }
 
 void volverACero() {
@@ -400,49 +420,50 @@ void ejecutarJoystick() {
   int ejeZ = 1;
   int ejeA = 1;
   int ejeB = 1;
+  estadoInicio = digitalRead(iniciocarrera);
+  if (estadoInicio == 0) {
 
-
-
-  claveEje = Serial.read();
-  if (claveEje == 'r') {
-    joystick();
-  }
-
-
-
-  if (claveEje == 'd') {
-    digitalWrite(dirAv, !digitalRead(dirAv));
-    digitalWrite(dirRot, !digitalRead(dirRot));
-  }
-
-  if (claveEje == 'x') {
-    intervalPulRot = 650;
-    unsigned long vueltasDeseadaspulRot = ejeX * valorEje;
-    unsigned long tiempoInicioX = micros();
-    unsigned long vueltasDadasX = 0;
-    while (vueltasDadasX < vueltasDeseadaspulRot) {
-      unsigned long tiempoActualX = micros();
-      if (tiempoActualX - tiempoInicioX >= intervalPulRot && vueltasDadasX < vueltasDeseadaspulRot) {
-        tiempoInicioX += intervalPulRot;
-        digitalWrite(pulRot, !digitalRead(pulRot));
-        if (digitalRead(pulRot)) vueltasDadasX++;
-      }
+    claveEje = Serial.read();
+    if (claveEje == 'r') {
+      joystick();
     }
-    digitalWrite(pulRot, LOW);
-  }
-  if (claveEje == 'y') {
-    intervaloPulAv = 650;
-    unsigned long vueltasDeseadaspulAv = ejeY * valorEje;
-    unsigned long tiempoInicioY = micros();
-    unsigned long vueltasDadasY = 0;
-    while (vueltasDadasY < vueltasDeseadaspulAv) {
-      unsigned long tiempoActualY = micros();
-      if (tiempoActualY - tiempoInicioY >= intervaloPulAv && vueltasDadasY < vueltasDeseadaspulAv) {
-        tiempoInicioY += intervaloPulAv;
-        digitalWrite(pulAv, !digitalRead(pulAv));
-        if (digitalRead(pulAv)) vueltasDadasY++;
-      }
+
+    if (claveEje == 'd') {
+      digitalWrite(dirAv, !digitalRead(dirAv));
+      digitalWrite(dirRot, !digitalRead(dirRot));
     }
-    digitalWrite(pulAv, LOW);
+
+    if (claveEje == 'x') {
+      intervalPulRot = 650;
+      unsigned long vueltasDeseadaspulRot = ejeX * valorEje;
+      unsigned long tiempoInicioX = micros();
+      unsigned long vueltasDadasX = 0;
+      while (vueltasDadasX < vueltasDeseadaspulRot) {
+        unsigned long tiempoActualX = micros();
+        if (tiempoActualX - tiempoInicioX >= intervalPulRot && vueltasDadasX < vueltasDeseadaspulRot) {
+          tiempoInicioX += intervalPulRot;
+          digitalWrite(pulRot, !digitalRead(pulRot));
+          if (digitalRead(pulRot)) vueltasDadasX++;
+        }
+      }
+      digitalWrite(pulRot, LOW);
+    }
+    if (claveEje == 'y') {
+      intervaloPulAv = 800;
+      unsigned long vueltasDeseadaspulAv = ejeY * valorEje;
+      unsigned long tiempoInicioY = micros();
+      unsigned long vueltasDadasY = 0;
+      while (vueltasDadasY < vueltasDeseadaspulAv) {
+        unsigned long tiempoActualY = micros();
+        if (tiempoActualY - tiempoInicioY >= intervaloPulAv && vueltasDadasY < vueltasDeseadaspulAv) {
+          tiempoInicioY += intervaloPulAv;
+          digitalWrite(pulAv, !digitalRead(pulAv));
+          if (digitalRead(pulAv)) vueltasDadasY++;
+        }
+      }
+      digitalWrite(pulAv, LOW);
+    }
+  } else {
+    Serial.println("g1");
   }
 }

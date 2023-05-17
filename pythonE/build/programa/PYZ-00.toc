@@ -342,6 +342,10 @@
   ('typing',
    'C:\\Users\\ASUS\\AppData\\Local\\Programs\\Python\\Python311\\Lib\\typing.py',
    'PYMODULE'),
+  ('variables',
+   'C:\\Users\\ASUS\\OneDrive - SENA\\spring '
+   'machine\\programming\\pythonE\\variables.py',
+   'PYMODULE'),
   ('zipfile',
    'C:\\Users\\ASUS\\AppData\\Local\\Programs\\Python\\Python311\\Lib\\zipfile.py',
    'PYMODULE')])
